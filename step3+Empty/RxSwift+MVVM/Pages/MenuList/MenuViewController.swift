@@ -10,6 +10,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 
+// ViewController 에는 View 의 요소만 담아주는 것
 class MenuViewController: UIViewController {
     // MARK: - Life Cycle
     
@@ -43,8 +44,8 @@ class MenuViewController: UIViewController {
         // bind 를 사용하면 순환참조 없이 사용이 가능하다
         viewModel.itemCount
             .map { "\($0)"}
-            .observeOn(MainScheduler.instance)
-            .bind(to: itemCountLabel.rx.text)
+            .asDriver(onErrorJustReturn: "") // UI 로직 처리하다가 스트림이 끊겨버리면 난감한 상황이 될 수 있으니 에러처리를 넣어준다.
+            .drive(itemCountLabel.rx.text) // observeOn + bind 의 역할 (항상 메인쓰레드에서 동작하게 된다)
             .disposed(by: disposeBag)
         
         viewModel.totalPrice
@@ -61,19 +62,19 @@ class MenuViewController: UIViewController {
                 cell.count.text = "\(item.count)"
                 
                 cell.onChange = { [weak self] increase in
-                    self?.viewModel.changeCount(item, increase)
+                    self?.viewModel.changeCount(item: item, increase: increase)
                 }
             }
             .disposed(by: disposeBag)
     }
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let identifier = segue.identifier ?? ""
-        if identifier == "OrderViewController",
-            let orderVC = segue.destination as? OrderViewController {
-            // TODO: pass selected menus
-        }
-    }
+//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+//        let identifier = segue.identifier ?? ""
+//        if identifier == "OrderViewController",
+//            let orderVC = segue.destination as? OrderViewController {
+//            // TODO: pass selected menus
+//        }
+//    }
 
     func showAlert(_ title: String, _ message: String) {
         let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -100,11 +101,13 @@ class MenuViewController: UIViewController {
         
         // menuObservable 이라는 제일 큰 물줄기를 변경하게 되는건데
         // 이렇게 되면 보여지는 tableView, count, price 값이 전부 변경되는 걸 확인할 수 있음
-        viewModel.menuObservable.onNext([
-            Menu(name: "changed", price: Int.random(in: 100...1000), count: Int.random(in: 0...3)),
-            Menu(name: "changed", price: Int.random(in: 100...1000), count: Int.random(in: 0...3)),
-            Menu(name: "changed", price: Int.random(in: 100...1000), count: Int.random(in: 0...3))
-        ])
+//        viewModel.menuObservable.onNext([
+//            Menu(id: 0, name: "changed", price: Int.random(in: 100...1000), count: Int.random(in: 0...3)),
+//            Menu(id: 1, name: "changed", price: Int.random(in: 100...1000), count: Int.random(in: 0...3)),
+//            Menu(id: 2, name: "changed", price: Int.random(in: 100...1000), count: Int.random(in: 0...3))
+//        ])
+        
+        viewModel.onOrder()
     }
 }
 
