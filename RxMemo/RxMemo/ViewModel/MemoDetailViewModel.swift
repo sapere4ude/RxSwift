@@ -12,7 +12,7 @@ import Action
 
 class MemoDetailViewModel: CommonViewModel {
     
-    let memo: Memo
+    var memo: Memo
     
     // 날짜를 문자열로 변경
     private var formatter: DateFormatter = {
@@ -46,6 +46,7 @@ class MemoDetailViewModel: CommonViewModel {
     func performUpdate(memo: Memo) -> Action<String, Void> {
         return Action { input in
             self.storage.update(memo: memo, content: input)
+                .do(onNext: { self.memo = $0 })
                 .map { [$0.content, self.formatter.string(from: $0.insertDate)] }
                 .bind(onNext: { self.contents.onNext($0) })
                 .disposed(by: self.rx.disposeBag)
