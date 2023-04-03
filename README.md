@@ -32,4 +32,30 @@ print("-----------------------------")
 // #2 구독방법 (개별 이벤트를 별도의 클로저에서 받고싶을때 사용하는 방법)
 o1.subscribe(onNext: { element in
     print(element)
-})
+})  
+
+## Subject
+// 타입 파라미터를 String 으로 설정
+// subject 가 생성될 땐, 내부에 아무런 이벤트가 저장되어 있지 않음
+let subject = PublishSubject<String>()
+
+// subject 가 Observer 의 역할도 할 수 있기에 onNext 메서드를 사용할 수 있다.
+subject.onNext("Hello") // "Hello" 라는 문자열이 찍히려면 PublishSubeject인 subject를 구독한 이후에 호출해야 문자열이 찍히는 걸 확인할 수 있다.
+
+let o1 = subject.subscribe { print(">> 1", $0) }
+o1.disposed(by: disposeBag)
+
+// 정상적으로 찍히는 것을 확인할 수 있는 코드
+subject.onNext("RxSwift")
+
+let o2 = subject.subscribe { print(">> 2", $0) }
+o2.disposed(by: disposeBag)
+
+subject.onNext("Subject") // 여기서 이렇게 호출하는 순간 o1 에서도 동일한 값이 호출되는걸 볼 수 있다.
+
+subject.onCompleted() // completed 이벤트가 전달된 이후에 생성되는 next 이벤트는 전달 되지 않는다.
+
+//subject.onError(MyError.error) <- 한번 확인해보기
+
+let o3 = subject.subscribe { print(">> 3", $0) }
+o3.disposed(by: disposeBag)
