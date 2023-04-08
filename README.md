@@ -59,3 +59,7 @@ subject.onCompleted() // completed 이벤트가 전달된 이후에 생성되는
 
 let o3 = subject.subscribe { print(">> 3", $0) }
 o3.disposed(by: disposeBag)
+                                    
+                                    
+## Operators  
+                                    just
